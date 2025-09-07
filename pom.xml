@@ -19,6 +19,7 @@
         <maven-surefire.version>3.5.3</maven-surefire.version>
         <lombok.version>1.18.38</lombok.version>
         <log4j.version>2.25.1</log4j.version>
+        <owner.version>1.0.12</owner.version>
     </properties>
 
     <dependencies>
@@ -75,6 +76,11 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j2-impl</artifactId>
             <version>2.25.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.aeonbits.owner</groupId>
+            <artifactId>owner</artifactId>
+            <version>${owner.version}</version>
         </dependency>
     </dependencies>
 
