@@ -6,22 +6,25 @@ import com.bookstore.dataproviders.TestDataProvider;
 import com.bookstore.factory.UserCredentialsFactory;
 import com.bookstore.pojo.LoginResponse;
 import com.bookstore.pojo.UserCredentials;
+import com.bookstore.user.UserManager;
 import com.bookstore.utils.ValidationUtility;
 import io.restassured.response.Response;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import static com.bookstore.configs.BookstoreConfigReader.config;
 
+@Listeners(com.bookstore.listeners.BookstoreListener.class)
 public class LoginTests {
 
-    @Test(description = "Login successful with valid credentials", groups = {"smoke", "auth"}, priority = 1)
+    @Test(description = "login successful with valid credentials test", groups = {"smoke", "auth"}, priority = 1)
     public void testLogin_ValidCredentials_Positive() {
 
-        UserCredentials signupPojo = UserCredentialsFactory.createSignupDataWithNewEmail();
-        Response res =SignupApi.signUpApi(signupPojo);
-        SignupApi.validateSignApi(res);
+//        UserCredentials signupPojo = UserCredentialsFactory.createSignupDataWithNewEmail();
+//        Response res =SignupApi.signUp(signupPojo);
+//        SignupApi.validateSignup(res);
 
-        Response response = new LoginApi().login(signupPojo);
+        Response response = new LoginApi().login(UserManager.getUserCredentials());
 
         ValidationUtility.validateStatusCode(response, 200);
         ValidationUtility.validateContentType(response, "application/json");
@@ -30,9 +33,8 @@ public class LoginTests {
         ValidationUtility.validateLoginResponse(loginResponse);
     }
 
-    @Test(groups = {"regression", "auth"}, priority = 2, dataProvider = "invalidUsers",
-            dataProviderClass = TestDataProvider.class)
-    public void testLogin_InvalidCredentialsTest(UserCredentials invalidLogin) {
+    @Test(groups = {"regression", "auth"}, priority = 2, dataProvider = "invalidUsers", dataProviderClass = TestDataProvider.class,description = "Testing login with invalid credentials")
+    public void loginInvalidCredentialsTest(UserCredentials invalidLogin) {
         Response response = new LoginApi().login(invalidLogin);
 
         ValidationUtility.validateStatusCode(response, 400);
@@ -44,8 +46,8 @@ public class LoginTests {
             dataProviderClass = TestDataProvider.class,description = "Test Login for valid Credentials Test")
     public void testLogin_validCredentialsTest(UserCredentials validLogin) {
 
-        Response res =SignupApi.signUpApi(validLogin);
-        SignupApi.validateSignApi(res);
+        Response res =SignupApi.signUp(validLogin);
+        SignupApi.validateSignup(res);
 
         Response response = new LoginApi().login(validLogin);
 
@@ -57,7 +59,7 @@ public class LoginTests {
     }
 
 
-    @Test(groups = {"regression", "auth"}, priority = 5)
+    @Test(groups = {"regression", "auth"}, priority = 5,description = "login with Empty Payload test")
     public void testLogin_EmptyPayload_Negative() {
         Response response = new LoginApi().login(UserCredentials.builder().build());
 
@@ -65,7 +67,7 @@ public class LoginTests {
         ValidationUtility.validateErrorResponse(response, 400, "Incorrect email or password");
     }
 
-    @Test(groups = {"regression", "auth"}, priority = 6)
+    @Test(groups = {"regression", "auth"}, priority = 6,description = "login Malformed Json test")
     public void testLogin_MalformedJson_Negative() {
         UserCredentials malformedRequest = UserCredentials.builder().build();
         Response response = new LoginApi().login(malformedRequest);
@@ -73,7 +75,7 @@ public class LoginTests {
 
     }
 
-    @Test(groups = {"performance", "auth"}, priority = 7)
+    @Test(groups = {"performance", "auth"}, priority = 7,description = "Login Response Time Test")
     public void testLogin_ResponseTime() {
 
         UserCredentials userCredentials = UserCredentials.builder()
