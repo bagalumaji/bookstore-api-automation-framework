@@ -9,7 +9,7 @@ import org.testng.annotations.DataProvider;
 
 
 public class TestDataProvider {
-    @DataProvider(name = "validBooks", parallel = true)
+    @DataProvider(name = "validBooks")
     public static Object[][] validBooksData() {
         return new Object[][] {
                 {createValidBook("The Great Gatsby", "F. Scott Fitzgerald", 1925, "A classic American novel")},
@@ -20,19 +20,19 @@ public class TestDataProvider {
         };
     }
 
-    @DataProvider(name = "invalidBooks", parallel = true)
+    @DataProvider(name = "invalidBooks")
     public static Object[][] invalidBooksData() {
         return new Object[][] {
                 {createInvalidBook(null, "Author Name", 2023, "Summary")},
                 {createInvalidBook("", "Author Name", 2023, "Summary")},
                 {createInvalidBook("Book Name", null, 2023, "Summary")},
                 {createInvalidBook("Book Name", "", 2023, "Summary")},
-                {createInvalidBook("Book Name", "Author Name", null, "Summary")},
+                {createInvalidBook("Book Name", "Author Name", 0, "Summary")},
                 {createInvalidBook("Book Name", "Author Name", -1, "Summary")}
         };
     }
 
-    @DataProvider(name = "updateBookData", parallel = true)
+    @DataProvider(name = "updateBookData")
     public static Object[][] updateBookData() {
         return new Object[][] {
                 {createValidBook("Updated Book Title", "Updated Author", 2024, "Updated summary")},
@@ -61,33 +61,33 @@ public class TestDataProvider {
         };
     }
 
-    public static Book createValidBook(String name, String author, Integer year, String summary) {
+    public static Book createValidBook(String name, String author, int year, String summary) {
         return Book.builder()
-                .id(generateRandomId())
+                .id(FakerDataUtil.getPositiveId())
                 .name(name)
                 .author(author)
-                .publishedYear(year)
-                .bookSummary(summary)
+                .published_year(year)
+                .book_summary(summary)
                 .build();
     }
 
     public static Book createInvalidBook(String name, String author, Integer year, String summary) {
         return Book.builder()
-                .id(generateRandomId())
+                .id(FakerDataUtil.getPositiveId())
                 .name(name)
                 .author(author)
-                .publishedYear(year)
-                .bookSummary(summary)
+                .published_year(year)
+                .book_summary(summary)
                 .build();
     }
 
     public static Book createRandomBook() {
         return Book.builder()
-                .id(generateRandomId())
-                .name("Random Book " + generateRandomId())
-                .author("Random Author " + generateRandomId())
-                .publishedYear(1900 + FakerDataUtil.getPositiveId())
-                .bookSummary("Random summary for testing " + generateRandomId())
+                .id(FakerDataUtil.getPositiveId())
+                .name("Random Book " +FakerDataUtil.getPositiveId())
+                .author("Random Author " + FakerDataUtil.getPositiveId())
+                .published_year(1900 + FakerDataUtil.getPositiveId())
+                .book_summary("Random summary for testing " + FakerDataUtil.getPositiveId())
                 .build();
     }
 
@@ -98,7 +98,4 @@ public class TestDataProvider {
                 .build();
     }
 
-    private static Integer generateRandomId() {
-        return 1000 + FakerDataUtil.getPositiveId();
-    }
 }
