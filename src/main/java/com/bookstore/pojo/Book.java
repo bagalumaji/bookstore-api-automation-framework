@@ -13,13 +13,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Book {
-    private Integer id;
+    private int id;
     private String name;
     private String author;
 
     @JsonProperty("published_year")
-    private Integer publishedYear;
+    private int published_year;
 
     @JsonProperty("book_summary")
-    private String bookSummary;
+    private String book_summary;
 }
