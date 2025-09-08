@@ -1,0 +1,195 @@
+name: Bookstore API Test Framework CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  smoke-tests:
+    runs-on: ubuntu-latest
+    name: Smoke Tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Run Smoke Tests
+        run: mvn clean test -Psmoke -Dgroups=smoke
+
+      - name: Upload Smoke Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-test-results
+          path: |
+            target/extent-reports/
+            target/surefire-reports/
+          retention-days: 30
+
+  regression-tests:
+    runs-on: ubuntu-latest
+    name: Regression Tests
+    needs: smoke-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Run Regression Tests
+        run: mvn clean test -Pregression -Dgroups=regression
+
+      - name: Upload Regression Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: regression-test-results
+          path: |
+            target/extent-reports/
+            target/surefire-reports/
+          retention-days: 30
+
+  full-test-suite:
+    runs-on: ubuntu-latest
+    name: Full Test Suite
+    needs: [smoke-tests, regression-tests]
+    if: github.event_name == 'schedule' || github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Run Full Test Suite
+        run: mvn clean test
+
+      - name: Upload Full Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: full-test-results
+          path: |
+            target/extent-reports/
+            target/surefire-reports/
+          retention-days: 30
+
+  publish-test-results:
+    runs-on: ubuntu-latest
+    name: Publish Test Results
+    needs: [smoke-tests, regression-tests, full-test-suite]
+    if: always()
+
+    steps:
+      - name: Download Test Results
+        uses: actions/download-artifact@v4
+        with:
+          path: test-results
+
+      - name: Publish Test Report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: API Test Results
+          path: 'test-results/**/surefire-reports/*.xml'
+          reporter: java-junit
+          fail-on-error: true
+
+  parallel-execution:
+    runs-on: ubuntu-latest
+    name: Parallel Test Execution
+    if: github.event_name == 'pull_request'
+
+    strategy:
+      matrix:
+        test-group: [health, auth, books]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Run Tests for ${{ matrix.test-group }}
+        run: mvn clean test -Dgroups=${{ matrix.test-group }}
+
+      - name: Upload Test Results for ${{ matrix.test-group }}
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.test-group }}
+          path: |
+            target/extent-reports/
+            target/surefire-reports/
+          retention-days: 30
+
+  notification:
+    runs-on: ubuntu-latest
+    name: Test Notification
+    needs: [smoke-tests, regression-tests, full-test-suite]
+    if: always()
+
+    steps:
+      - name: Notify on Success
+        if: ${{ needs.smoke-tests.result == 'success' && needs.regression-tests.result == 'success' }}
+        run: echo "✅ All tests passed successfully!"
+
+      - name: Notify on Failure
+        if: ${{ needs.smoke-tests.result == 'failure' || needs.regression-tests.result == 'failure' }}
+        run: |
+          echo "❌ Test execution failed!"
+          echo "Smoke Tests: ${{ needs.smoke-tests.result }}"
+          echo "Regression Tests: ${{ needs.regression-tests.result }}"
+          exit 1
