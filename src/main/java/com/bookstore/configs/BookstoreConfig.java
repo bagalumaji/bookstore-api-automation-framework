@@ -34,4 +34,7 @@ public interface BookstoreConfig extends Config {
     @Key("endpoint.health")
     String healthEndPoint();
 
+    @Key("environment")
+    String environment();
+
 }
