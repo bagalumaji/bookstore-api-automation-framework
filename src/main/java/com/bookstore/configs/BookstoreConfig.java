@@ -10,5 +10,28 @@ import org.aeonbits.owner.Config;
         "file:${user.dir}/src/test/resources/configs/application.properties",
 })
 public interface BookstoreConfig extends Config {
+    @Key("base.url")
+    String baseUri();
+
+    @Key("test.id")
+    int id();
+
+    @Key("endpoint.signup")
+    String signupEndPoint();
+
+    @Key("test.username")
+    String email();
+
+    @Key("test.password")
+    String password();
+
+    @Key("endpoint.login")
+    String loginEndpoint();
+
+    @Key("endpoint.books")
+    String booksEndPoint();
+
+    @Key("endpoint.health")
+    String healthEndPoint();
 
 }
