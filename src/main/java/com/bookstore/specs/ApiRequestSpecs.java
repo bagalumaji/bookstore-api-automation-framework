@@ -1,6 +1,7 @@
 package com.bookstore.specs;
 
 import com.bookstore.configs.BookstoreConfigReader;
+import com.bookstore.reports.ExtentReportLogger;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 
@@ -12,15 +13,22 @@ public final class ApiRequestSpecs {
 
 
     public static RequestSpecification getRequestSpec() {
-        return new RequestSpecBuilder()
+        RequestSpecification requestSpecification = new RequestSpecBuilder()
                 .setBaseUri(BookstoreConfigReader.config().baseUri())
                 .setContentType(JSON)
+                .setContentType("application/json")
+                .addHeader("Accept", "application/json")
                 .build();
+        ExtentReportLogger.logRequestInfo(requestSpecification);
+        return requestSpecification;
     }
+
     public static RequestSpecification getRequestSpecWithAuth(String token) {
-        return new RequestSpecBuilder()
+        RequestSpecification requestSpecification = new RequestSpecBuilder()
                 .addRequestSpecification(getRequestSpec())
                 .addHeader("Authorization", "Bearer " + token)
                 .build();
+        ExtentReportLogger.logRequestInfo(requestSpecification);
+        return requestSpecification;
     }
 }

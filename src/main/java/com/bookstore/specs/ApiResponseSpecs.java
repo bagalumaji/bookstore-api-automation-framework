@@ -1,17 +1,19 @@
 package com.bookstore.specs;
 
 import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.filter.log.LogDetail;
 import io.restassured.http.ContentType;
 import io.restassured.specification.ResponseSpecification;
 import org.apache.http.HttpStatus;
 
-import static com.bookstore.enums.SuccessStatusTypes.OK;
+import static com.bookstore.enums.StatusTypes.OK;
 //todo
 public class ApiResponseSpecs {
     public static ResponseSpecification ok200Spec() {
         return new ResponseSpecBuilder()
                 .expectStatusCode(OK.getCode())
                 .expectStatusLine(OK.getMessage())
+                .log(LogDetail.ALL)
                 .build();
     }
 
