@@ -22,16 +22,14 @@ public class LoginApi {
     }
 
     public String getAuthToken(String username, String password) {
-        Response response = login(username, password);
-        if (response.getStatusCode() == 200) {
-            LoginResponse loginResponse = response.as(LoginResponse.class);
-            return loginResponse.getAccess_token();
-        }
-        throw new RuntimeException("Failed to get auth token. Status: " + response.getStatusCode() +
-                ", Response: " + response.getBody().asString());
+        return login(username, password)
+                .as(LoginResponse.class)
+                .getAccess_token();
     }
 
-    public String getValidAuthToken() {
-        return getAuthToken(config().email(), config().password());
+    public String getAuthToken(UserCredentials userCredentials) {
+        return login(userCredentials)
+                .as(LoginResponse.class)
+                .getAccess_token();
     }
 }
