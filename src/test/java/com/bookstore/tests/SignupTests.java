@@ -11,34 +11,22 @@ import org.testng.annotations.Test;
 
 public class SignupTests {
 
-    @Test
-    public void createUserApiTest() {
+    @Test(priority = 1,groups = {"smoke"}, description = "verify Create User Test")
+    public void verifyCreateUserTest() {
         // Arrange
         UserCredentials signupPojo = UserCredentialsFactory.createSignupDataWithNewEmail();
 
         //Act
-        Response response = SignupApi.signUpApi(signupPojo);
+        Response response = SignupApi.signUp(signupPojo);
 
         //Assert
-        SignupApi.validateSignApi(response);
+        SignupApi.validateSignup(response);
     }
-    @Test(groups = {"smoke", "auth"}, priority = 3, dataProvider = "validUsers",dataProviderClass = TestDataProvider.class)
-    public void testSignup_ValidUser_Positive(UserCredentials validUser) {
-        // logInfo("Testing signup with valid user data - positive scenario");
 
-        Response response = SignupApi.signUpApi(validUser);
-
-        // Assuming signup returns 201 for successful creation
-        if (response.getStatusCode() == 201) {
-            ValidationUtility.validateStatusCode(response, 201);
-            //logPass("User signup successful");
-        } else if (response.getStatusCode() == 409) {
-            // User already exists - this is acceptable for test data
-            // logInfo("User already exists - this is expected for test data");
-            ValidationUtility.validateStatusCode(response, 409);
-        } else {
-            Assert.fail("Unexpected status code: " + response.getStatusCode());
-        }
+    @Test(groups = {"smoke"}, priority = 3, dataProvider = "validUsers", dataProviderClass = TestDataProvider.class,description = "Testing signup with valid user data")
+    public void verifySignupForValidUserTest(UserCredentials validUser) {
+        Response response = SignupApi.signUp(validUser);
+        SignupApi.validateSignup(response);
     }
 }
 
