@@ -75,8 +75,8 @@ public class ValidationUtility {
         Assert.assertNotNull(actualBook, "Created book is null");
         Assert.assertEquals(actualBook.getName(), expectedBook.getName(), "Book name mismatch");
         Assert.assertEquals(actualBook.getAuthor(), expectedBook.getAuthor(), "Book author mismatch");
-        Assert.assertEquals(actualBook.getPublishedYear(), expectedBook.getPublishedYear(), "Published year mismatch");
-        Assert.assertEquals(actualBook.getBookSummary(), expectedBook.getBookSummary(), "Book summary mismatch");
+        Assert.assertEquals(actualBook.getPublished_year(), expectedBook.getPublished_year(), "Published year mismatch");
+        Assert.assertEquals(actualBook.getBook_summary(), expectedBook.getBook_summary(), "Book summary mismatch");
     }
 
     public static void validateBookUpdate(Book expectedBook, Book actualBook) {
