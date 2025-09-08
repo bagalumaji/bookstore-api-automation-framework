@@ -84,4 +84,38 @@ public class ValidationUtility {
         Assert.assertEquals(actualBook.getId(), expectedBook.getId(), "Book ID mismatch during update");
     }
 
+    public static void validateSuccessResponse(Response response, boolean expectedSuccess) {
+        Boolean actualSuccess = response.jsonPath().get("success");
+        Assert.assertNotNull(actualSuccess, "Success field is null");
+        Assert.assertEquals(actualSuccess, expectedSuccess,
+                "Success field mismatch. Expected: " + expectedSuccess + ", Actual: " + actualSuccess);
+    }
+
+    public static void validateBooksList(List<Book> books) {
+        Assert.assertNotNull(books, "Books list is null");
+        for (Book book : books) {
+            validateBookResponse(book);
+        }
+    }
+    public static void validateJsonPath(Response response, String jsonPath, Object expectedValue) {
+        Object actualValue = response.jsonPath().get(jsonPath);
+        Assert.assertEquals(actualValue, expectedValue,
+                "JSON path value mismatch for '" + jsonPath + "'. Expected: " + expectedValue + ", Actual: " + actualValue);
+    }
+
+    public static void validateJsonPathExists(Response response, String jsonPath) {
+        Object value = response.jsonPath().get(jsonPath);
+        Assert.assertNotNull(value, "JSON path '" + jsonPath + "' not found in response");
+    }
+
+    public static void validateHeaderExists(Response response, String headerName) {
+        String headerValue = response.getHeader(headerName);
+        Assert.assertNotNull(headerValue, "Header '" + headerName + "' not found in response");
+    }
+
+    public static void validateHeaderValue(Response response, String headerName, String expectedValue) {
+        String actualValue = response.getHeader(headerName);
+        Assert.assertEquals(actualValue, expectedValue,
+                "Header value mismatch for '" + headerName + "'. Expected: " + expectedValue + ", Actual: " + actualValue);
+    }
 }
