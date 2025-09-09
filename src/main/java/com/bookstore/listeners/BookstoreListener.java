@@ -1,5 +1,6 @@
 package com.bookstore.listeners;
 
+import com.bookstore.annotation.Bookstore;
 import com.bookstore.apis.signup.SignupApi;
 import com.bookstore.reports.ExtentReport;
 import com.bookstore.reports.ExtentReportLogger;
@@ -11,6 +12,8 @@ import org.testng.ISuiteListener;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
 
 public class BookstoreListener implements ITestListener, ISuiteListener {
     @Override
@@ -29,6 +32,11 @@ public class BookstoreListener implements ITestListener, ISuiteListener {
     @Override
     public void onTestStart(ITestResult result) {
         ExtentReport.createTest(result.getMethod().getConstructorOrMethod().getMethod().getAnnotation(Test.class).description());
+
+        ExtentReport.assignAuthor(result.getMethod().getConstructorOrMethod().getMethod()
+                .getAnnotation(Bookstore.class).author());
+        ExtentReport.assignCategory(result.getMethod().getConstructorOrMethod().getMethod()
+                .getAnnotation(Bookstore.class).category());
     }
 
     @Override
@@ -38,11 +46,16 @@ public class BookstoreListener implements ITestListener, ISuiteListener {
 
     @Override
     public void onTestFailure(ITestResult result) {
+        ExtentReportLogger.info(result.getName() + " is failed");
+        ExtentReportLogger.fail(result.getThrowable().getMessage() );
+        ExtentReportLogger.info(Arrays.toString(result.getThrowable().getStackTrace()));
         ExtentReportLogger.fail(result.getMethod().getConstructorOrMethod().getMethod().getAnnotation(Test.class).description()+" is failed");
+
     }
 
     @Override
     public void onTestSkipped(ITestResult result) {
         ExtentReportLogger.skip(result.getMethod().getConstructorOrMethod().getMethod().getAnnotation(Test.class).description()+" is skipped");
     }
+
 }
