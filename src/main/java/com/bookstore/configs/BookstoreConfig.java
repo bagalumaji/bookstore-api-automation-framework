@@ -51,4 +51,6 @@ public interface BookstoreConfig extends Config {
 
     @Key("nonExistentId")
     int nonExistentId();
+    @Key("existingId")
+    int existingId();
 }
