@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+
+<suite name="API Test Suite" parallel="methods" thread-count="3" data-provider-thread-count="3">
+
+    <parameter name="environment" value="test"/>
+
+    <listeners>
+        <listener class-name="com.bookstore.listeners.BookstoreListener"/>
+    </listeners>
+
+    <!-- Smoke Test Suite -->
+    <test name="Smoke Tests" preserve-order="true">
+        <groups>
+            <run>
+                <include name="smoke"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="com.bookstore.tests.HealthTests"/>
+            <class name="com.bookstore.tests.SignupTests"/>
+            <class name="com.bookstore.tests.LoginTests"/>
+            <class name="com.bookstore.tests.BookTests"/>
+        </classes>
+    </test>
+
+    <!-- Regression Test Suite -->
+    <test name="Regression Tests" preserve-order="false">
+        <groups>
+            <run>
+                <include name="regression"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="com.bookstore.tests.HealthTests"/>
+            <class name="com.bookstore.tests.SignupTests"/>
+            <class name="com.bookstore.tests.LoginTests"/>
+            <class name="com.bookstore.tests.BookTests"/>
+        </classes>
+    </test>
+
+    <!-- Full Test Suite -->
+    <test name="Full Test Suite" preserve-order="false">
+        <classes>
+            <class name="com.bookstore.tests.HealthTests"/>
+            <class name="com.bookstore.tests.SignupTests"/>
+            <class name="com.bookstore.tests.LoginTests"/>
+            <class name="com.bookstore.tests.BookTests"/>
+        </classes>
+    </test>
+
+</suite>
