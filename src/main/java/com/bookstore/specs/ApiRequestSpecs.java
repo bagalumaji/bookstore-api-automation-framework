@@ -16,8 +16,6 @@ public final class ApiRequestSpecs {
         RequestSpecification requestSpecification = new RequestSpecBuilder()
                 .setBaseUri(BookstoreConfigReader.config().baseUri())
                 .setContentType(JSON)
-                .setContentType("application/json")
-                .addHeader("Accept", "application/json")
                 .build();
         ExtentReportLogger.logRequestInfo(requestSpecification);
         return requestSpecification;
@@ -28,6 +26,12 @@ public final class ApiRequestSpecs {
                 .addRequestSpecification(getRequestSpec())
                 .addHeader("Authorization", "Bearer " + token)
                 .build();
+        ExtentReportLogger.logRequestInfo(requestSpecification);
+        return requestSpecification;
+    }
+
+    public static RequestSpecification getRequestSpecWithAuth(String token, int pathParam) {
+        RequestSpecification requestSpecification = getRequestSpecWithAuth(token).pathParam("id", pathParam);
         ExtentReportLogger.logRequestInfo(requestSpecification);
         return requestSpecification;
     }
