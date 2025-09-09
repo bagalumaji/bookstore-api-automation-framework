@@ -5,8 +5,10 @@ import com.bookstore.annotation.Bookstore;
 import com.bookstore.apis.book.BookApi;
 import com.bookstore.configs.BookstoreConfigReader;
 import com.bookstore.constants.ApiConstants;
+import com.bookstore.constants.BookConstants;
 import com.bookstore.dataproviders.BookDataProvider;
 import com.bookstore.dataproviders.UserDataProvider;
+import com.bookstore.enums.ApiStatusCodes;
 import com.bookstore.factory.BookFactory;
 import com.bookstore.pojo.Book;
 import com.bookstore.specs.ApiRequestResponseSpec;
@@ -19,12 +21,6 @@ import org.testng.Assert;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import static com.bookstore.constants.ApiConstants.*;
-import static com.bookstore.constants.BookConstants.BOOK_ID_MISMATCH;
-import static com.bookstore.constants.BookConstants.BOOK_NOT_FOUND;
-import static com.bookstore.enums.ApiStatusCodes.*;
-import static com.bookstore.enums.ApiStatusCodes.NOT_AUTHENTICATED;
-
 @Listeners(com.bookstore.listeners.BookstoreListener.class)
 public class BookTests {
 
@@ -32,8 +28,8 @@ public class BookTests {
     @Test(groups = {"smoke","regression", "books"}, priority = 1,description = "Verify Get Al lBooks With Valid Token Test")
     public void verifyGetAllBooksWithValidTokenTest() {
         Response response = new BookApi().getAllBooks(TokenManager.getToken());
-        ValidationUtility.validateStatusCode(response, OK.getCode());
-        ValidationUtility.validateContentType(response, APPLICATION_JSON);
+        ValidationUtility.validateStatusCode(response, ApiStatusCodes.OK.getCode());
+        ValidationUtility.validateContentType(response, ApiConstants.APPLICATION_JSON);
         ValidationUtility.validateResponseTime(response, BookstoreConfigReader.config().requestTimeout());
     }
 
@@ -42,16 +38,16 @@ public class BookTests {
     public void verifyGetAllBooksWithoutTokenTest() {
         Response response = new BookApi().getAllBooks("");
 
-        ValidationUtility.validateStatusCode(response, NOT_AUTHENTICATED.getCode());
-        ValidationUtility.validateErrorResponse(response, NOT_AUTHENTICATED.getCode(), ApiConstants.NOT_AUTHENTICATED);
+        ValidationUtility.validateStatusCode(response, ApiStatusCodes.NOT_AUTHENTICATED.getCode());
+        ValidationUtility.validateErrorResponse(response, ApiStatusCodes.NOT_AUTHENTICATED.getCode(), ApiConstants.NOT_AUTHENTICATED);
     }
     @Bookstore(author = "Umaji",category = "Books")
     @Test(groups = {"regression", "regression", "books"}, priority = 3,description = "verifyGetAllBooksWithInvalidTokenTest")
     public void verifyGetAllBooksWithInvalidTokenTest() {
         Response response = new BookApi().getAllBooks(BookstoreConfigReader.config().invalidToken());
 
-        ValidationUtility.validateStatusCode(response, NOT_AUTHENTICATED.getCode());
-        ValidationUtility.validateErrorResponse(response, NOT_AUTHENTICATED.getCode(), INVALID_TOKEN_OR_EXPIRED_TOKEN);
+        ValidationUtility.validateStatusCode(response, ApiStatusCodes.NOT_AUTHENTICATED.getCode());
+        ValidationUtility.validateErrorResponse(response, ApiStatusCodes.NOT_AUTHENTICATED.getCode(), ApiConstants.INVALID_TOKEN_OR_EXPIRED_TOKEN);
     }
 
     @Bookstore(author = "Umaji",category = "Books")
@@ -64,8 +60,8 @@ public class BookTests {
                 .build();
 
         Response response = new BookApi().createBook(validBook,apiReqRes);
-        ValidationUtility.validateStatusCode(response, OK.getCode());
-        ValidationUtility.validateContentType(response, APPLICATION_JSON);
+        ValidationUtility.validateStatusCode(response, ApiStatusCodes.OK.getCode());
+        ValidationUtility.validateContentType(response, ApiConstants.APPLICATION_JSON);
 
         Book createdBook = response.as(Book.class);
         BookApi.validateBookResponse(createdBook);
@@ -84,8 +80,8 @@ public class BookTests {
         Book validBook = BookFactory.createRandomBook();
         Response response = new BookApi().createBook(validBook,apiReqRes);
 
-        ValidationUtility.validateStatusCode(response, NOT_AUTHENTICATED.getCode());
-        ValidationUtility.validateErrorResponse(response, NOT_AUTHENTICATED.getCode(), ApiConstants.NOT_AUTHENTICATED);
+        ValidationUtility.validateStatusCode(response, ApiStatusCodes.NOT_AUTHENTICATED.getCode());
+        ValidationUtility.validateErrorResponse(response, ApiStatusCodes.NOT_AUTHENTICATED.getCode(), ApiConstants.NOT_AUTHENTICATED);
     }
 
     @Bookstore(author = "Umaji",category = "Books")
@@ -108,8 +104,8 @@ public class BookTests {
 
         Response response = new BookApi().updateBook(updateData,apiReqRes);
 
-        ValidationUtility.validateStatusCode(response, OK.getCode());
-        ValidationUtility.validateContentType(response, APPLICATION_JSON);
+        ValidationUtility.validateStatusCode(response, ApiStatusCodes.OK.getCode());
+        ValidationUtility.validateContentType(response, ApiConstants.APPLICATION_JSON);
 
         Book updatedBook = response.as(Book.class);
         BookApi.validateBookUpdate(updateData, updatedBook);
@@ -127,8 +123,8 @@ public class BookTests {
                 .build();
         Response response = new BookApi().updateBook(updateData, apiReqRes);
 
-        ValidationUtility.validateStatusCode(response, NOT_FOUND.getCode());
-        ValidationUtility.validateErrorResponse(response, NOT_FOUND.getCode(), BOOK_NOT_FOUND);
+        ValidationUtility.validateStatusCode(response, ApiStatusCodes.NOT_FOUND.getCode());
+        ValidationUtility.validateErrorResponse(response, ApiStatusCodes.NOT_FOUND.getCode(), BookConstants.BOOK_NOT_FOUND);
     }
 
     @Bookstore(author = "Umaji",category = "Books")
@@ -144,8 +140,8 @@ public class BookTests {
 
         Response response = new BookApi().updateBook(updateData, apiReqRes);
 
-        ValidationUtility.validateStatusCode(response, NOT_AUTHENTICATED.getCode());
-        ValidationUtility.validateErrorResponse(response, NOT_AUTHENTICATED.getCode(), ApiConstants.NOT_AUTHENTICATED);
+        ValidationUtility.validateStatusCode(response, ApiStatusCodes.NOT_AUTHENTICATED.getCode());
+        ValidationUtility.validateErrorResponse(response, ApiStatusCodes.NOT_AUTHENTICATED.getCode(), ApiConstants.NOT_AUTHENTICATED);
     }
 
     @Bookstore(author = "Umaji",category = "Books")
@@ -166,9 +162,9 @@ public class BookTests {
         Response response = new BookApi().deleteBook(apiReqRes);
         response.prettyPrint();
 
-        ValidationUtility.validateStatusCode(response, OK.getCode());
+        ValidationUtility.validateStatusCode(response, ApiStatusCodes.OK.getCode());
         Response getResponse = new BookApi().getBookById(apiReqRes);
-        ValidationUtility.validateStatusCode(getResponse, NOT_FOUND.getCode());
+        ValidationUtility.validateStatusCode(getResponse, ApiStatusCodes.NOT_FOUND.getCode());
     }
 
     @Bookstore(author = "Umaji",category = "Books")
@@ -182,8 +178,8 @@ public class BookTests {
 
         Response response = new BookApi().deleteBook(apiReqRes);
 
-        ValidationUtility.validateStatusCode(response, NOT_FOUND.getCode());
-        ValidationUtility.validateErrorResponse(response, NOT_FOUND.getCode(), BOOK_NOT_FOUND);
+        ValidationUtility.validateStatusCode(response, ApiStatusCodes.NOT_FOUND.getCode());
+        ValidationUtility.validateErrorResponse(response, ApiStatusCodes.NOT_FOUND.getCode(), BookConstants.BOOK_NOT_FOUND);
     }
 
     @Bookstore(author = "Umaji",category = "Books")
@@ -198,8 +194,8 @@ public class BookTests {
 
         Response response = new BookApi().deleteBook(apiReqRes);
 
-        ValidationUtility.validateStatusCode(response, NOT_AUTHENTICATED.getCode());
-        ValidationUtility.validateErrorResponse(response, NOT_AUTHENTICATED.getCode(), ApiConstants.NOT_AUTHENTICATED);
+        ValidationUtility.validateStatusCode(response, ApiStatusCodes.NOT_AUTHENTICATED.getCode());
+        ValidationUtility.validateErrorResponse(response, ApiStatusCodes.NOT_AUTHENTICATED.getCode(), ApiConstants.NOT_AUTHENTICATED);
     }
 
     @Bookstore(author = "Umaji",category = "Books")
@@ -218,12 +214,12 @@ public class BookTests {
         apiReqRes.setReqSpec(ApiRequestSpecs.getRequestSpecWithAuth(TokenManager.getToken(), createdBook.getId()));
         Response response = new BookApi().getBookById(apiReqRes);
 
-        ValidationUtility.validateStatusCode(response, OK.getCode());
-        ValidationUtility.validateContentType(response, APPLICATION_JSON);
+        ValidationUtility.validateStatusCode(response, ApiStatusCodes.OK.getCode());
+        ValidationUtility.validateContentType(response, ApiConstants.APPLICATION_JSON);
 
         Book retrievedBook = response.as(Book.class);
         BookApi.validateBookResponse(retrievedBook);
-        Assert.assertEquals(retrievedBook.getId(), createdBook.getId(), BOOK_ID_MISMATCH);
+        Assert.assertEquals(retrievedBook.getId(), createdBook.getId(), BookConstants.BOOK_ID_MISMATCH);
     }
 
     @Bookstore(author = "Umaji",category = "Books")
@@ -237,8 +233,8 @@ public class BookTests {
 
         Response response = new BookApi().getBookById(apiReqRes);
 
-        ValidationUtility.validateStatusCode(response, NOT_FOUND.getCode());
-        ValidationUtility.validateErrorResponse(response, NOT_FOUND.getCode(), BOOK_NOT_FOUND);
+        ValidationUtility.validateStatusCode(response, ApiStatusCodes.NOT_FOUND.getCode());
+        ValidationUtility.validateErrorResponse(response, ApiStatusCodes.NOT_FOUND.getCode(), BookConstants.BOOK_NOT_FOUND);
 
     }
 
@@ -254,15 +250,15 @@ public class BookTests {
 
         Response response = new BookApi().getBookById(apiReqRes);
 
-        ValidationUtility.validateStatusCode(response, NOT_AUTHENTICATED.getCode());
-        ValidationUtility.validateErrorResponse(response, NOT_AUTHENTICATED.getCode(), ApiConstants.NOT_AUTHENTICATED);
+        ValidationUtility.validateStatusCode(response, ApiStatusCodes.NOT_AUTHENTICATED.getCode());
+        ValidationUtility.validateErrorResponse(response, ApiStatusCodes.NOT_AUTHENTICATED.getCode(), ApiConstants.NOT_AUTHENTICATED);
     }
 
     @Bookstore(author = "Umaji",category = "Books")
     @Test(groups = {"regression", "books"}, priority = 15, description = "verify Create Multiple Books Test", dataProvider = "bookTestData",dataProviderClass = BookDataProvider.class)
     public void verifyCreateMultipleBooksTest(Book book) {
         Response response = new BookApi().createBook(book, TokenManager.getToken());
-        ValidationUtility.validateStatusCode(response, OK.getCode());
+        ValidationUtility.validateStatusCode(response, ApiStatusCodes.OK.getCode());
 
         Book createdBook = response.as(Book.class);
         BookApi.validateBookResponse(createdBook);
@@ -292,7 +288,7 @@ public class BookTests {
         // Read
         Response getResponse = new BookApi().getBookById(apiReqRes);
         getResponse.prettyPrint();
-        ValidationUtility.validateStatusCode(getResponse, OK.getCode());
+        ValidationUtility.validateStatusCode(getResponse, ApiStatusCodes.OK.getCode());
         Book retrievedBook = getResponse.as(Book.class);
         Assert.assertEquals(retrievedBook.getId(), createdBook.getId());
 
@@ -305,10 +301,10 @@ public class BookTests {
 
         // Delete
         Response deleteResponse = new BookApi().deleteBook(apiReqRes);
-        ValidationUtility.validateStatusCode(deleteResponse, OK.getCode());
+        ValidationUtility.validateStatusCode(deleteResponse, ApiStatusCodes.OK.getCode());
 
         apiReqRes.setRespSpec(ApiResponseSpecs.getNotFoundResponseSpec());
         Response verifyResponse = new BookApi().getBookById(apiReqRes);
-        ValidationUtility.validateStatusCode(verifyResponse, NOT_FOUND.getCode());
+        ValidationUtility.validateStatusCode(verifyResponse, ApiStatusCodes.NOT_FOUND.getCode());
     }
 }
