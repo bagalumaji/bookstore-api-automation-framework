@@ -13,10 +13,4 @@ public final class Token {
             TokenManager.setAccessToken(loginApi.getAuthToken(userCredentials));
         }
     }
-    public static void createToken(String email, String password) {
-        if(Objects.isNull(TokenManager.getToken())){
-            LoginApi loginApi=new LoginApi();
-            TokenManager.setAccessToken(loginApi.getAuthToken(email, password));
-        }
-    }
 }
