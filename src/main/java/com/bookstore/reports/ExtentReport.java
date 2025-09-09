@@ -35,4 +35,10 @@ public final class ExtentReport {
     public static void createTest(String testCaseName){
         ExtentManager.setExtentTest(extentReports.createTest(testCaseName));
     }
+    public static void assignAuthor(String author){
+        ExtentManager.getExtentTest().assignAuthor(author);
+    }
+    public static void assignCategory(String category){
+        ExtentManager.getExtentTest().assignCategory(category);
+    }
 }
