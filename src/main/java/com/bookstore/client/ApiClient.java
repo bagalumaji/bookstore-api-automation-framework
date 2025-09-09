@@ -1,7 +1,9 @@
 package com.bookstore.client;
 
+import com.bookstore.configs.BookstoreConfigReader;
 import com.bookstore.specs.ApiRequestSpecs;
 import com.bookstore.specs.ApiResponseSpecs;
+import com.bookstore.specs.ApiRequestResponseSpec;
 import io.restassured.response.Response;
 
 import static io.restassured.RestAssured.given;
@@ -35,22 +37,42 @@ public final class ApiClient {
                 .response();
     }
 
-    public static Response post(String endpoint, Object requestBody) {
+    public static Response getWithAuth(ApiRequestResponseSpec apiRequestResponseSpec) {
         return given()
-                .spec(ApiRequestSpecs.getRequestSpec())
-                .body(requestBody)
-                //.log()
-                //.ifValidationFails()
+                .spec(apiRequestResponseSpec.getReqSpec())
+                .log()
+                .ifValidationFails()
                 .when()
-                .post(endpoint)
+                .get(BookstoreConfigReader.config().booksEndPointWithParamId())
                 .then()
-                .spec(ApiResponseSpecs.ok200Spec())
-              //  .log()
-               // .ifValidationFails()
+                .log()
+                .ifValidationFails()
                 .extract()
                 .response();
     }
 
+    public static Response post(String endpoint, Object requestBody, ApiRequestResponseSpec apiRequestResponseSpec) {
+        return given()
+                .spec(apiRequestResponseSpec.getReqSpec())
+                .body(requestBody)
+                .when()
+                .post(endpoint)
+                .then()
+                .spec(apiRequestResponseSpec.getRespSpec())
+                .extract()
+                .response();
+    }
+    public static Response post(String endpoint, Object requestBody) {
+        return given()
+                .spec(ApiRequestSpecs.getRequestSpec())
+                .body(requestBody)
+                .when()
+                .post(endpoint)
+                .then()
+                .spec(ApiResponseSpecs.getSuccessResponseSpec())
+                .extract()
+                .response();
+    }
     public static Response postWithAuth(String endpoint, Object requestBody, String token) {
         System.out.println("requestBody = " + requestBody);
         System.out.println("endpoint = " + endpoint);
@@ -63,6 +85,24 @@ public final class ApiClient {
                 .when()
                 .post(endpoint)
                 .then()
+                .log()
+                .ifValidationFails()
+                .extract()
+                .response();
+    }
+    public static Response postWithAuth(String endpoint, Object requestBody, ApiRequestResponseSpec apiRequestResSpec) {
+        System.out.println("requestBody = " + requestBody);
+        System.out.println("endpoint = " + endpoint);
+
+        return given()
+                .spec(apiRequestResSpec.getReqSpec())
+                .body(requestBody)
+                .log()
+                .ifValidationFails()
+                .when()
+                .post(endpoint)
+                .then()
+                .spec(apiRequestResSpec.getRespSpec())
                 .log()
                 .ifValidationFails()
                 .extract()
@@ -98,10 +138,25 @@ public final class ApiClient {
                 .extract()
                 .response();
     }
-
-    public static Response delete(String endpoint) {
+    public static Response put(String endpoint, Object requestBody, ApiRequestResponseSpec apiRequestResponseSpec) {
         return given()
-                .spec(ApiRequestSpecs.getRequestSpec())
+                .spec(apiRequestResponseSpec.getReqSpec())
+                .body(requestBody)
+                .log()
+                .ifValidationFails()
+                .when()
+                .put(endpoint)
+                .then()
+                .spec(apiRequestResponseSpec.getRespSpec())
+                .log()
+                .ifValidationFails()
+                .extract()
+                .response();
+    }
+
+    public static Response delete(String endpoint, String token) {
+        return given()
+                .spec(ApiRequestSpecs.getRequestSpecWithAuth(token))
                 .log()
                 .ifValidationFails()
                 .when()
@@ -113,13 +168,13 @@ public final class ApiClient {
                 .response();
     }
 
-    public static Response deleteWithAuth(String endpoint, String token) {
+    public static Response delete(ApiRequestResponseSpec apiRequestResponseSpec) {
         return given()
-                .spec(ApiRequestSpecs.getRequestSpecWithAuth(token))
+                .spec(apiRequestResponseSpec.getReqSpec())
                 .log()
                 .ifValidationFails()
                 .when()
-                .delete(endpoint)
+                .delete(BookstoreConfigReader.config().booksEndPointWithParamId())
                 .then()
                 .log()
                 .ifValidationFails()
