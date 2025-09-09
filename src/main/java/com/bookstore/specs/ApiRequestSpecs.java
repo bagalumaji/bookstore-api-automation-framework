@@ -13,7 +13,6 @@ public final class ApiRequestSpecs {
     }
 
     public static RequestSpecification getRequestSpec() {
-        ExtentReportLogger.info("Base Uri: "+BookstoreConfigReader.config().baseUri());
         return new RequestSpecBuilder()
                 .setBaseUri(BookstoreConfigReader.config().baseUri())
                 .setContentType(JSON)
@@ -31,8 +30,9 @@ public final class ApiRequestSpecs {
     }
 
     public static RequestSpecification getRequestSpec(String token, String endpoint) {
-        ExtentReportLogger.info("Performing request with token: ");
+        ExtentReportLogger.info("Base Uri: "+BookstoreConfigReader.config().baseUri());
         ExtentReportLogger.info("Endpoint: " + endpoint);
+        ExtentReportLogger.info("Performing request with token: ");
         return getRequestSpec(token).basePath(endpoint);
     }
 }

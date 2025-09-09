@@ -24,7 +24,6 @@ public final class ExtentReportLogger {
         info("Response Status Code : "+response.statusCode());
         info("Response Headers : "+response.getHeaders());
         info("Response Content-Type : "+response.getContentType());
-        info("Response Body : ");
-        info(response.getBody().prettyPrint());
+        info("Response Body : "+response.getBody().toString());
     }
 }
