@@ -1,195 +1,189 @@
-name: Bookstore API Test Framework CI/CD
+name: 🚀 Bookstore API Demo Test
 
+# Trigger configuration - Manual trigger with input options
 on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
-  schedule:
-    # Run tests daily at 2 AM UTC
-    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: 'Select Test Suite to Run'
+        required: true
+        default: 'smoke'
+        type: choice
+        options:
+          - smoke
+          - regression
+          - health
+          - auth
+          - books
+          - all
+      environment:
+        description: 'Select Environment'
+        required: true
+        default: 'qa'
+        type: choice
+        options:
+          - dev
+          - qa
+          - staging
+      enable_reporting:
+        description: 'Generate ExtentReports'
+        required: false
+        default: true
+        type: boolean
+      parallel_execution:
+        description: 'Enable Parallel Execution'
+        required: false
+        default: false
+        type: boolean
 
+# Single job for demo simplicity
 jobs:
-  smoke-tests:
+  api-test-demo:
+    name: 🧪 API Test Execution - ${{ inputs.test_suite }}
     runs-on: ubuntu-latest
-    name: Smoke Tests
+
+    # Environment variables
+    env:
+      ENVIRONMENT: ${{ inputs.environment }}
+      TEST_SUITE: ${{ inputs.test_suite }}
 
     steps:
-      - name: Checkout code
+      # Step 1: Checkout code
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Set up JDK 21
+      # Step 2: Setup Java
+      - name: ☕ Setup Java 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
+          cache: 'maven'
 
-      - name: Cache Maven dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-
-      - name: Run Smoke Tests
-        run: mvn clean test -Psmoke -Dgroups=smoke
-
-      - name: Upload Smoke Test Results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: smoke-test-results
-          path: |
-            target/extent-reports/
-            target/surefire-reports/
-          retention-days: 30
-
-  regression-tests:
-    runs-on: ubuntu-latest
-    name: Regression Tests
-    needs: smoke-tests
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-
-      - name: Run Regression Tests
-        run: mvn clean test -Pregression -Dgroups=regression
-
-      - name: Upload Regression Test Results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: regression-test-results
-          path: |
-            target/extent-reports/
-            target/surefire-reports/
-          retention-days: 30
-
-  full-test-suite:
-    runs-on: ubuntu-latest
-    name: Full Test Suite
-    needs: [smoke-tests, regression-tests]
-    if: github.event_name == 'schedule' || github.ref == 'refs/heads/main'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-
-      - name: Run Full Test Suite
-        run: mvn clean test
-
-      - name: Upload Full Test Results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: full-test-results
-          path: |
-            target/extent-reports/
-            target/surefire-reports/
-          retention-days: 30
-
-  publish-test-results:
-    runs-on: ubuntu-latest
-    name: Publish Test Results
-    needs: [smoke-tests, regression-tests, full-test-suite]
-    if: always()
-
-    steps:
-      - name: Download Test Results
-        uses: actions/download-artifact@v4
-        with:
-          path: test-results
-
-      - name: Publish Test Report
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: API Test Results
-          path: 'test-results/**/surefire-reports/*.xml'
-          reporter: java-junit
-          fail-on-error: true
-
-  parallel-execution:
-    runs-on: ubuntu-latest
-    name: Parallel Test Execution
-    if: github.event_name == 'pull_request'
-
-    strategy:
-      matrix:
-        test-group: [health, auth, books]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-
-      - name: Run Tests for ${{ matrix.test-group }}
-        run: mvn clean test -Dgroups=${{ matrix.test-group }}
-
-      - name: Upload Test Results for ${{ matrix.test-group }}
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-results-${{ matrix.test-group }}
-          path: |
-            target/extent-reports/
-            target/surefire-reports/
-          retention-days: 30
-
-  notification:
-    runs-on: ubuntu-latest
-    name: Test Notification
-    needs: [smoke-tests, regression-tests, full-test-suite]
-    if: always()
-
-    steps:
-      - name: Notify on Success
-        if: ${{ needs.smoke-tests.result == 'success' && needs.regression-tests.result == 'success' }}
-        run: echo "✅ All tests passed successfully!"
-
-      - name: Notify on Failure
-        if: ${{ needs.smoke-tests.result == 'failure' || needs.regression-tests.result == 'failure' }}
+      # Step 3: Display Test Configuration
+      - name: 📋 Display Test Configuration
         run: |
-          echo "❌ Test execution failed!"
-          echo "Smoke Tests: ${{ needs.smoke-tests.result }}"
-          echo "Regression Tests: ${{ needs.regression-tests.result }}"
-          exit 1
+          echo "================================================"
+          echo "🎯 Test Configuration"
+          echo "================================================"
+          echo "📦 Test Suite: ${{ inputs.test_suite }}"
+          echo "🌍 Environment: ${{ inputs.environment }}"
+          echo "📊 Reporting: ${{ inputs.enable_reporting }}"
+          echo "⚡ Parallel: ${{ inputs.parallel_execution }}"
+          echo "🕐 Execution Time: $(date)"
+          echo "================================================"
+
+      # Step 4: Install Dependencies
+      - name: 📦 Install Dependencies
+        run: |
+          echo "📦 Installing Maven dependencies..."
+          mvn clean install -DskipTests
+
+      # Step 5: Run Tests based on selection
+      - name: 🧪 Execute Tests - ${{ inputs.test_suite }}
+        run: |
+          echo "🚀 Starting test execution..."
+          
+          # Set parallel execution parameters if enabled
+          PARALLEL_PARAMS=""
+          if [ "${{ inputs.parallel_execution }}" == "true" ]; then
+            PARALLEL_PARAMS="-DthreadCount=3 -DdataProviderThreadCount=2"
+            echo "⚡ Parallel execution enabled with 3 threads"
+          fi
+          
+          # Execute tests based on selected suite
+          case "${{ inputs.test_suite }}" in
+            "all")
+              echo "📊 Running ALL tests..."
+              mvn test $PARALLEL_PARAMS -Denvironment=${{ inputs.environment }}
+              ;;
+            "smoke")
+              echo "🚀 Running SMOKE tests..."
+              mvn test -Dgroups=smoke $PARALLEL_PARAMS -Denvironment=${{ inputs.environment }}
+              ;;
+            "regression")
+              echo "🔄 Running REGRESSION tests..."
+              mvn test -Dgroups=regression $PARALLEL_PARAMS -Denvironment=${{ inputs.environment }}
+              ;;
+            "health")
+              echo "🏥 Running HEALTH tests..."
+              mvn test -Dtest=HealthTests $PARALLEL_PARAMS -Denvironment=${{ inputs.environment }}
+              ;;
+            "auth")
+              echo "🔐 Running AUTH tests..."
+              mvn test -Dtest=LoginTests,SignupTests $PARALLEL_PARAMS -Denvironment=${{ inputs.environment }}
+              ;;
+            "books")
+              echo "📚 Running BOOKS tests..."
+              mvn test -Dtest=BookTests $PARALLEL_PARAMS -Denvironment=${{ inputs.environment }}
+              ;;
+          esac
+
+      # Step 6: Generate Test Summary
+      - name: 📊 Generate Test Summary
+        if: always()
+        run: |
+          echo "## 📊 Test Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Parameter | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 📦 Test Suite | ${{ inputs.test_suite }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🌍 Environment | ${{ inputs.environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ⚡ Parallel Execution | ${{ inputs.parallel_execution }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📊 Reporting Enabled | ${{ inputs.enable_reporting }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🕐 Execution Time | $(date) |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Add test results if available
+          if [ -f "target/surefire-reports/testng-results.xml" ]; then
+            echo "### ✅ Test Results" >> $GITHUB_STEP_SUMMARY
+            echo "Results available in artifacts" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      # Step 7: Upload Test Reports
+      - name: 📤 Upload Test Reports
+        if: always() && inputs.enable_reporting == true
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-${{ inputs.test_suite }}-${{ inputs.environment }}
+          path: |
+            target/extent-reports/
+            target/surefire-reports/
+          retention-days: 7
+
+      # Step 8: Upload Logs
+      - name: 📝 Upload Test Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs-${{ inputs.test_suite }}-${{ inputs.environment }}
+          path: |
+            target/logs/
+          retention-days: 3
+
+      # Step 9: Test Result Comment (for demo visibility)
+      - name: 💬 Display Test Results
+        if: always()
+        run: |
+          echo "================================================"
+          echo "✅ Test Execution Completed!"
+          echo "================================================"
+          if [ -f "target/surefire-reports/testng-results.xml" ]; then
+            echo "📊 Test reports have been generated"
+            echo "📁 Check artifacts for detailed reports"
+          else
+            echo "⚠️ No test reports found"
+          fi
+          echo "================================================"
+
+      # Step 10: Notify completion
+      - name: 🔔 Execution Complete
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ SUCCESS: All tests passed!"
+          else
+            echo "❌ FAILURE: Some tests failed. Check reports for details."
+          fi
