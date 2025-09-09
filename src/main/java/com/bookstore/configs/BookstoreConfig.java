@@ -44,4 +44,11 @@ public interface BookstoreConfig extends Config {
     @Key("endpoint.books.id")
     String booksEndPointWithParamId();
 
+    @Key("request.timeout")
+    int requestTimeout();
+    @Key("path.book.id")
+    int bookPathParamId();
+
+    @Key("nonExistentId")
+    int nonExistentId();
 }
