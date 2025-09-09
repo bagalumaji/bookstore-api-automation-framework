@@ -8,11 +8,12 @@
     </listeners>
 
     <!-- Smoke Test Suite -->
-    <test name="Bookstore Tests" preserve-order="true">
+    <test name="Bookstore Tests">
         <classes>
             <class name="com.bookstore.tests.HealthTests"/>
             <class name="com.bookstore.tests.LoginTests"/>
-<!--            <class name="com.bookstore.tests.BookTests"/>-->
+            <class name="com.bookstore.tests.SignupTests"/>
+            <class name="com.bookstore.tests.BookTests"/>
         </classes>
     </test>
 </suite>
