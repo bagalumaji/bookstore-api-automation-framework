@@ -1,7 +1,6 @@
 package com.bookstore.user;
 
 import com.bookstore.factory.UserCredentialsFactory;
-import com.bookstore.pojo.UserCredentials;
 
 import java.util.Objects;
 
