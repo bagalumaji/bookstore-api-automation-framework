@@ -11,12 +11,17 @@ public final class ApiRequestSpecs {
     private ApiRequestSpecs() {
     }
 
-
     public static RequestSpecification getRequestSpec() {
         RequestSpecification requestSpecification = new RequestSpecBuilder()
                 .setBaseUri(BookstoreConfigReader.config().baseUri())
                 .setContentType(JSON)
                 .build();
+        ExtentReportLogger.logRequestInfo(requestSpecification);
+        return requestSpecification;
+    }
+
+    public static RequestSpecification getRequestSpec(int pathParam) {
+        RequestSpecification requestSpecification = getRequestSpec().pathParam("id",pathParam);
         ExtentReportLogger.logRequestInfo(requestSpecification);
         return requestSpecification;
     }
