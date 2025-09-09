@@ -1,10 +1,11 @@
 package com.bookstore.client;
 
-import com.bookstore.configs.BookstoreConfigReader;
+import com.bookstore.reports.ExtentReportLogger;
 import com.bookstore.specs.ApiRequestSpecs;
 import com.bookstore.specs.ApiResponseSpecs;
-import com.bookstore.specs.ApiRequestResponseSpec;
 import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 
 import static io.restassured.RestAssured.given;
 public final class ApiClient {
@@ -25,7 +26,7 @@ public final class ApiClient {
 
     public static Response getWithAuth(String endpoint, String token) {
         return given()
-                .spec(ApiRequestSpecs.getRequestSpecWithAuth(token))
+                .spec(ApiRequestSpecs.getRequestSpec(token))
                 .log()
                 .ifValidationFails()
                 .when()
@@ -37,31 +38,6 @@ public final class ApiClient {
                 .response();
     }
 
-    public static Response getWithAuth(ApiRequestResponseSpec apiRequestResponseSpec) {
-        return given()
-                .spec(apiRequestResponseSpec.getReqSpec())
-                .log()
-                .ifValidationFails()
-                .when()
-                .get(BookstoreConfigReader.config().booksEndPointWithParamId())
-                .then()
-                .log()
-                .ifValidationFails()
-                .extract()
-                .response();
-    }
-
-    public static Response post(String endpoint, Object requestBody, ApiRequestResponseSpec apiRequestResponseSpec) {
-        return given()
-                .spec(apiRequestResponseSpec.getReqSpec())
-                .body(requestBody)
-                .when()
-                .post(endpoint)
-                .then()
-                .spec(apiRequestResponseSpec.getRespSpec())
-                .extract()
-                .response();
-    }
     public static Response post(String endpoint, Object requestBody) {
         return given()
                 .spec(ApiRequestSpecs.getRequestSpec())
@@ -73,139 +49,38 @@ public final class ApiClient {
                 .extract()
                 .response();
     }
-    public static Response postWithAuth(String endpoint, Object requestBody, String token) {
-        System.out.println("requestBody = " + requestBody);
-        System.out.println("endpoint = " + endpoint);
 
-        return given()
-                .spec(ApiRequestSpecs.getRequestSpecWithAuth(token))
-                .body(requestBody)
-                .log()
-                .ifValidationFails()
-                .when()
-                .post(endpoint)
-                .then()
-                .log()
-                .ifValidationFails()
-                .extract()
-                .response();
-    }
-    public static Response postWithAuth(String endpoint, Object requestBody, ApiRequestResponseSpec apiRequestResSpec) {
-        System.out.println("requestBody = " + requestBody);
-        System.out.println("endpoint = " + endpoint);
 
-        return given()
-                .spec(apiRequestResSpec.getReqSpec())
-                .body(requestBody)
-                .log()
-                .ifValidationFails()
-                .when()
-                .post(endpoint)
-                .then()
-                .spec(apiRequestResSpec.getRespSpec())
-                .log()
-                .ifValidationFails()
-                .extract()
-                .response();
+    public static Response get(RequestSpecification requestSpecification, ResponseSpecification responseSpecification) {
+        Response response= prepareRequest(requestSpecification).get();
+        return validateAndExtractResponse(response,responseSpecification);
     }
 
-    public static Response put(String endpoint, Object requestBody) {
-        return given()
-                .spec(ApiRequestSpecs.getRequestSpec())
-                .body(requestBody)
-                .log()
-                .ifValidationFails()
-                .when()
-                .put(endpoint)
-                .then()
-                .log()
-                .ifValidationFails()
-                .extract()
-                .response();
+    public static Response post(RequestSpecification requestSpecification, ResponseSpecification responseSpecification) {
+        Response response= prepareRequest(requestSpecification).post();
+        return validateAndExtractResponse(response,responseSpecification);
+    }
+    public static Response put(RequestSpecification requestSpecification, ResponseSpecification responseSpecification) {
+        Response response= prepareRequest(requestSpecification).put();
+        return validateAndExtractResponse(response,responseSpecification);
+    }
+    public static Response delete(RequestSpecification requestSpecification, ResponseSpecification responseSpecification) {
+        Response response= prepareRequest(requestSpecification).delete();
+        return validateAndExtractResponse(response,responseSpecification);
     }
 
-    public static Response putWithAuth(String endpoint, Object requestBody, String token) {
+    private static RequestSpecification prepareRequest(RequestSpecification requestSpecification){
         return given()
-                .spec(ApiRequestSpecs.getRequestSpecWithAuth(token))
-                .body(requestBody)
+                .spec(requestSpecification)
                 .log()
                 .ifValidationFails()
-                .when()
-                .put(endpoint)
-                .then()
-                .log()
-                .ifValidationFails()
-                .extract()
-                .response();
+                .when();
     }
-    public static Response put(String endpoint, Object requestBody, ApiRequestResponseSpec apiRequestResponseSpec) {
-        return given()
-                .spec(apiRequestResponseSpec.getReqSpec())
-                .body(requestBody)
-                .log()
-                .ifValidationFails()
-                .when()
-                .put(endpoint)
+    private static Response validateAndExtractResponse(Response response, ResponseSpecification responseSpecification){
+        ExtentReportLogger.logResponseInfo(response);
+        return response
                 .then()
-                .spec(apiRequestResponseSpec.getRespSpec())
-                .log()
-                .ifValidationFails()
-                .extract()
-                .response();
-    }
-
-    public static Response delete(String endpoint, String token) {
-        return given()
-                .spec(ApiRequestSpecs.getRequestSpecWithAuth(token))
-                .log()
-                .ifValidationFails()
-                .when()
-                .delete(endpoint)
-                .then()
-                .log()
-                .ifValidationFails()
-                .extract()
-                .response();
-    }
-
-    public static Response delete(ApiRequestResponseSpec apiRequestResponseSpec) {
-        return given()
-                .spec(apiRequestResponseSpec.getReqSpec())
-                .log()
-                .ifValidationFails()
-                .when()
-                .delete(BookstoreConfigReader.config().booksEndPointWithParamId())
-                .then()
-                .log()
-                .ifValidationFails()
-                .extract()
-                .response();
-    }
-
-    public static Response patch(String endpoint, Object requestBody) {
-        return given()
-                .spec(ApiRequestSpecs.getRequestSpec())
-                .body(requestBody)
-                .log()
-                .ifValidationFails()
-                .when()
-                .patch(endpoint)
-                .then()
-                .log()
-                .ifValidationFails()
-                .extract()
-                .response();
-    }
-
-    public static Response patchWithAuth(String endpoint, Object requestBody, String token) {
-        return given()
-                .spec(ApiRequestSpecs.getRequestSpecWithAuth(token))
-                .body(requestBody)
-                .log()
-                .ifValidationFails()
-                .when()
-                .patch(endpoint)
-                .then()
+                .spec(responseSpecification)
                 .log()
                 .ifValidationFails()
                 .extract()
