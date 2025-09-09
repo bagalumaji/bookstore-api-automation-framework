@@ -1,6 +1,7 @@
 package com.bookstore.apis.login;
 
 import com.bookstore.client.ApiClient;
+import com.bookstore.constants.ApiConstants;
 import com.bookstore.constants.LoginConstants;
 import com.bookstore.pojo.UserCredentials;
 import com.bookstore.pojo.LoginResponse;
@@ -27,6 +28,6 @@ public class LoginApi {
         Assert.assertNotNull(loginResponse, "Login response is null");
         Assert.assertNotNull(loginResponse.getAccess_token(), "Token is null");
         Assert.assertFalse(loginResponse.getAccess_token().trim().isEmpty(), "Token is empty");
-        Assert.assertEquals(loginResponse.getToken_type(), LoginConstants.TOKEN_TYPE, LoginConstants.LOGIN_WAS_NOT_SUCCESSFUL);
+        Assert.assertEquals(loginResponse.getToken_type(), ApiConstants.TOKEN_TYPE, LoginConstants.LOGIN_WAS_NOT_SUCCESSFUL);
     }
 }
