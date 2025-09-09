@@ -3,7 +3,6 @@ package com.bookstore.tests;
 import com.bookstore.annotation.Bookstore;
 import com.bookstore.apis.login.LoginApi;
 import com.bookstore.apis.signup.SignupApi;
-import com.bookstore.basesetup.BaseSetup;
 import com.bookstore.configs.BookstoreConfigReader;
 import com.bookstore.constants.ApiConstants;
 import com.bookstore.constants.LoginConstants;
@@ -11,9 +10,7 @@ import com.bookstore.dataproviders.UserDataProvider;
 import com.bookstore.enums.ApiStatusCodes;
 import com.bookstore.pojo.LoginResponse;
 import com.bookstore.pojo.UserCredentials;
-import com.bookstore.specs.ApiRequestSpecs;
 import com.bookstore.specs.ApiResponseSpecs;
-import com.bookstore.specs.ApiRequestResponseSpec;
 import com.bookstore.user.UserManager;
 import com.bookstore.utils.ValidationUtility;
 import io.restassured.response.Response;
@@ -26,7 +23,7 @@ import static com.bookstore.constants.AnnotationConstants.UMAJI;
 import static com.bookstore.enums.ApiStatusCodes.BAD_REQUEST;
 
 @Listeners(com.bookstore.listeners.BookstoreListener.class)
-public class LoginTests extends BaseSetup {
+public class LoginTests {
 
     @Bookstore(author = UMAJI,category = LOGIN)
     @Test(description = "login successful with valid credentials test", groups = {"smoke","login"}, priority = 1)

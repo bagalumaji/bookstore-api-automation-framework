@@ -2,7 +2,6 @@ package com.bookstore.tests;
 
 import com.bookstore.annotation.Bookstore;
 import com.bookstore.apis.health.HealthApi;
-import com.bookstore.basesetup.BaseSetup;
 import com.bookstore.configs.BookstoreConfigReader;
 import com.bookstore.constants.ApiConstants;
 import com.bookstore.utils.ValidationUtility;
@@ -13,7 +12,7 @@ import static com.bookstore.constants.AnnotationConstants.HEALTH;
 import static com.bookstore.constants.AnnotationConstants.UMAJI;
 
 @Listeners(com.bookstore.listeners.BookstoreListener.class)
-public class HealthTests extends BaseSetup {
+public class HealthTests {
 
     @Bookstore(author = UMAJI,category = HEALTH)
     @Test(groups = {"smoke","health"}, priority = 1,description = "verify Health Test")

@@ -22,12 +22,7 @@ public class BookstoreListener implements ITestListener, ISuiteListener {
     @Override
     public void onStart(ISuite suite) {
         ExtentReport.initReport();
-        User.createUser();
-        if(Objects.isNull(TokenManager.getToken())) {
-            ExtentReport.createTest("SignupTest");
-            SignupApi.signUp(UserManager.getUserCredentials());
-            Token.createToken(UserManager.getUserCredentials());
-        }
+
     }
 
     @Override
@@ -38,17 +33,16 @@ public class BookstoreListener implements ITestListener, ISuiteListener {
     @Override
     public void onTestStart(ITestResult result) {
         User.createUser();
-        if(Objects.isNull(TokenManager.getToken())) {
-            ExtentReport.createTest("SignupTest");
-            SignupApi.signUp(UserManager.getUserCredentials());
-            Token.createToken(UserManager.getUserCredentials());
-        }
         ExtentReport.createTest(result.getMethod().getConstructorOrMethod().getMethod().getAnnotation(Test.class).description());
 
         ExtentReport.assignAuthor(result.getMethod().getConstructorOrMethod().getMethod()
                 .getAnnotation(Bookstore.class).author());
         ExtentReport.assignCategory(result.getMethod().getConstructorOrMethod().getMethod()
                 .getAnnotation(Bookstore.class).category());
+        if(Objects.isNull(TokenManager.getToken())) {
+            SignupApi.signUp(UserManager.getUserCredentials());
+            Token.createToken(UserManager.getUserCredentials());
+        }
     }
 
     @Override

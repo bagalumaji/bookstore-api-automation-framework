@@ -3,7 +3,6 @@ package com.bookstore.tests;
 
 import com.bookstore.annotation.Bookstore;
 import com.bookstore.apis.book.BookApi;
-import com.bookstore.basesetup.BaseSetup;
 import com.bookstore.configs.BookstoreConfigReader;
 import com.bookstore.constants.ApiConstants;
 import com.bookstore.constants.BookConstants;
@@ -23,7 +22,7 @@ import static com.bookstore.constants.AnnotationConstants.BOOKS;
 import static com.bookstore.constants.AnnotationConstants.UMAJI;
 
 @Listeners(com.bookstore.listeners.BookstoreListener.class)
-public class BookTests extends BaseSetup {
+public class BookTests {
 
     @Bookstore(author = UMAJI,category = BOOKS)
     @Test(groups = {"smoke","regression", "books"}, priority = 1,description = "Verify Get Al lBooks With Valid Token Test")
