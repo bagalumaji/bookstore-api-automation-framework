@@ -1,0 +1,189 @@
+name: 🚀 Bookstore API Demo Test
+
+# Trigger configuration - Manual trigger with input options
+on:
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: 'Select Test Suite to Run'
+        required: true
+        default: 'smoke'
+        type: choice
+        options:
+          - smoke
+          - regression
+          - health
+          - auth
+          - books
+          - all
+      environment:
+        description: 'Select Environment'
+        required: true
+        default: 'qa'
+        type: choice
+        options:
+          - dev
+          - qa
+          - staging
+      enable_reporting:
+        description: 'Generate ExtentReports'
+        required: false
+        default: true
+        type: boolean
+      parallel_execution:
+        description: 'Enable Parallel Execution'
+        required: false
+        default: false
+        type: boolean
+
+# Single job for demo simplicity
+jobs:
+  api-test-demo:
+    name: 🧪 API Test Execution - ${{ inputs.test_suite }}
+    runs-on: ubuntu-latest
+
+    # Environment variables
+    env:
+      ENVIRONMENT: ${{ inputs.environment }}
+      TEST_SUITE: ${{ inputs.test_suite }}
+
+    steps:
+      # Step 1: Checkout code
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Step 2: Setup Java
+      - name: ☕ Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # Step 3: Display Test Configuration
+      - name: 📋 Display Test Configuration
+        run: |
+          echo "================================================"
+          echo "🎯 Test Configuration"
+          echo "================================================"
+          echo "📦 Test Suite: ${{ inputs.test_suite }}"
+          echo "🌍 Environment: ${{ inputs.environment }}"
+          echo "📊 Reporting: ${{ inputs.enable_reporting }}"
+          echo "⚡ Parallel: ${{ inputs.parallel_execution }}"
+          echo "🕐 Execution Time: $(date)"
+          echo "================================================"
+
+      # Step 4: Install Dependencies
+      - name: 📦 Install Dependencies
+        run: |
+          echo "📦 Installing Maven dependencies..."
+          mvn clean install -DskipTests
+
+      # Step 5: Run Tests based on selection
+      - name: 🧪 Execute Tests - ${{ inputs.test_suite }}
+        run: |
+          echo "🚀 Starting test execution..."
+          
+          # Set parallel execution parameters if enabled
+          PARALLEL_PARAMS=""
+          if [ "${{ inputs.parallel_execution }}" == "true" ]; then
+            PARALLEL_PARAMS="-DthreadCount=3 -DdataProviderThreadCount=2"
+            echo "⚡ Parallel execution enabled with 3 threads"
+          fi
+          
+          # Execute tests based on selected suite
+          case "${{ inputs.test_suite }}" in
+            "all")
+              echo "📊 Running ALL tests..."
+              mvn test $PARALLEL_PARAMS -Denvironment=${{ inputs.environment }}
+              ;;
+            "smoke")
+              echo "🚀 Running SMOKE tests..."
+              mvn test -Dgroups=smoke $PARALLEL_PARAMS -Denvironment=${{ inputs.environment }}
+              ;;
+            "regression")
+              echo "🔄 Running REGRESSION tests..."
+              mvn test -Dgroups=regression $PARALLEL_PARAMS -Denvironment=${{ inputs.environment }}
+              ;;
+            "health")
+              echo "🏥 Running HEALTH tests..."
+              mvn test -Dtest=HealthTests $PARALLEL_PARAMS -Denvironment=${{ inputs.environment }}
+              ;;
+            "auth")
+              echo "🔐 Running AUTH tests..."
+              mvn test -Dtest=LoginTests,SignupTests $PARALLEL_PARAMS -Denvironment=${{ inputs.environment }}
+              ;;
+            "books")
+              echo "📚 Running BOOKS tests..."
+              mvn test -Dtest=BookTests $PARALLEL_PARAMS -Denvironment=${{ inputs.environment }}
+              ;;
+          esac
+
+      # Step 6: Generate Test Summary
+      - name: 📊 Generate Test Summary
+        if: always()
+        run: |
+          echo "## 📊 Test Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Parameter | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 📦 Test Suite | ${{ inputs.test_suite }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🌍 Environment | ${{ inputs.environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ⚡ Parallel Execution | ${{ inputs.parallel_execution }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📊 Reporting Enabled | ${{ inputs.enable_reporting }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🕐 Execution Time | $(date) |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Add test results if available
+          if [ -f "target/surefire-reports/testng-results.xml" ]; then
+            echo "### ✅ Test Results" >> $GITHUB_STEP_SUMMARY
+            echo "Results available in artifacts" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      # Step 7: Upload Test Reports
+      - name: 📤 Upload Test Reports
+        if: always() && inputs.enable_reporting == true
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-${{ inputs.test_suite }}-${{ inputs.environment }}
+          path: |
+            target/extent-reports/
+            target/surefire-reports/
+          retention-days: 7
+
+      # Step 8: Upload Logs
+      - name: 📝 Upload Test Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs-${{ inputs.test_suite }}-${{ inputs.environment }}
+          path: |
+            target/logs/
+          retention-days: 3
+
+      # Step 9: Test Result Comment (for demo visibility)
+      - name: 💬 Display Test Results
+        if: always()
+        run: |
+          echo "================================================"
+          echo "✅ Test Execution Completed!"
+          echo "================================================"
+          if [ -f "target/surefire-reports/testng-results.xml" ]; then
+            echo "📊 Test reports have been generated"
+            echo "📁 Check artifacts for detailed reports"
+          else
+            echo "⚠️ No test reports found"
+          fi
+          echo "================================================"
+
+      # Step 10: Notify completion
+      - name: 🔔 Execution Complete
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ SUCCESS: All tests passed!"
+          else
+            echo "❌ FAILURE: Some tests failed. Check reports for details."
+          fi
