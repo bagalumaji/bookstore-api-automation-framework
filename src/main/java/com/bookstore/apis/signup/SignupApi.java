@@ -21,7 +21,7 @@ public final class SignupApi {
     public static void validateSignup(Response response) {
         response
                 .then()
-                .spec(ApiResponseSpecs.ok200Spec())
+                .spec(ApiResponseSpecs.getSuccessResponseSpec())
                 .body("message",equalTo(MESSAGE));
     }
 }
