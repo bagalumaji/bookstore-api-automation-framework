@@ -5,8 +5,12 @@ import com.bookstore.constants.ApiConstants;
 import com.bookstore.constants.LoginConstants;
 import com.bookstore.pojo.UserCredentials;
 import com.bookstore.pojo.LoginResponse;
-import com.bookstore.specs.ApiRequestResponseSpec;
+import com.bookstore.reports.ExtentReportLogger;
+import com.bookstore.specs.ApiRequestSpecs;
+import com.bookstore.specs.ApiResponseSpecs;
 import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import org.testng.Assert;
 
 import static com.bookstore.configs.BookstoreConfigReader.config;
@@ -14,10 +18,17 @@ import static com.bookstore.configs.BookstoreConfigReader.config;
 public class LoginApi {
 
     public Response login(UserCredentials userCredentials) {
-        return ApiClient.post(config().loginEndpoint(), userCredentials);
+        ExtentReportLogger.info("Requesting Method : POST");
+        ExtentReportLogger.info("Performing login with credentials: "+userCredentials);
+        RequestSpecification req=ApiRequestSpecs.getRequestSpec().basePath(config().loginEndpoint()).body(userCredentials);
+        ResponseSpecification res = ApiResponseSpecs.getSuccessResponseSpec();
+        return ApiClient.post(req,res);
     }
-    public Response login(UserCredentials userCredentials, ApiRequestResponseSpec apiRequestResponseSpec) {
-        return ApiClient.post(config().loginEndpoint(), userCredentials, apiRequestResponseSpec);
+    public Response login(UserCredentials userCredentials, ResponseSpecification res) {
+        ExtentReportLogger.info("Requesting Method : POST");
+        ExtentReportLogger.info("Performing login with credentials: "+userCredentials);
+        RequestSpecification req=ApiRequestSpecs.getRequestSpec().basePath(config().loginEndpoint()).body(userCredentials);
+        return ApiClient.post(req,res);
     }
     public String getAuthToken(UserCredentials userCredentials) {
         return login(userCredentials)

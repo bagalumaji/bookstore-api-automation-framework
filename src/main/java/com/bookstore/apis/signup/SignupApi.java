@@ -3,6 +3,7 @@ package com.bookstore.apis.signup;
 import com.bookstore.client.ApiClient;
 import com.bookstore.configs.BookstoreConfigReader;
 import com.bookstore.pojo.UserCredentials;
+import com.bookstore.reports.ExtentReportLogger;
 import com.bookstore.specs.ApiResponseSpecs;
 import io.restassured.response.Response;
 
@@ -14,11 +15,14 @@ public final class SignupApi {
     }
 
     public static Response signUp(UserCredentials signupRequestData) {
+        ExtentReportLogger.info("Request Method : POST");
+        ExtentReportLogger.info("Body : "+signupRequestData.toString());
         return ApiClient.post(BookstoreConfigReader.config().signupEndPoint(), signupRequestData);
     }
 
 
     public static void validateSignup(Response response) {
+        ExtentReportLogger.logResponseInfo(response);
         response
                 .then()
                 .spec(ApiResponseSpecs.getSuccessResponseSpec())
