@@ -8,7 +8,7 @@
     </listeners>
 
     <!-- Smoke Test Suite -->
-    <test name="Bookstore Tests">
+    <test name="Bookstore Tests" thread-count="4" parallel="methods">
         <classes>
             <class name="com.bookstore.tests.HealthTests"/>
             <class name="com.bookstore.tests.LoginTests"/>
