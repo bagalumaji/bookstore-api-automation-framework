@@ -16,14 +16,4 @@ public final class UserCredentialsFactory {
                 .password(BookstoreConfigReader.config().password())
                 .build();
     }
-
-    public static UserCredentials createSignupDataWithExistingEmail() {
-        return UserCredentials
-                .builder()
-                .id(FakerDataUtil.getPositiveId())
-                .email(BookstoreConfigReader.config().email())
-                .password(BookstoreConfigReader.config().password())
-                .build();
-    }
-
 }
